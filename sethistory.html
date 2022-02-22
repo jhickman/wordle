@@ -1,0 +1,177 @@
+<html>
+<head>
+  <title>Setting history?</title>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .streak,
+    .guessDistro {
+      display: grid;
+      grid-template-columns: 110px auto;
+      gap: 10px;
+    }
+
+  </style>
+  <script type="text/javascript">
+    function n(e, a, s) {
+      return a in e ? Object.defineProperty(e, a, {
+        value: s,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }) : e[a] = s, e
+    }
+
+    function sethistory() {
+      var total = parseInt($("#total").val(), 10);
+      var lastPlayed = Date.parse($("#lastPlayed").val());
+      var currentStreak = parseInt($("#currentStreak").val(), 10);
+      var maxStreak = parseInt($("#maxStreak").val(), 10);
+
+      var first = parseInt($("#first").val(), 10);
+      var second = parseInt($("#second").val(), 10);
+      var third = parseInt($("#third").val(), 10);
+      var fourth = parseInt($("#fourth").val(), 10);
+      var fifth = parseInt($("#fifth").val(), 10);
+      var sixth = parseInt($("#sixth").val(), 10);
+
+      var gamesWon = first + second + third + fourth + fifth + sixth;
+      var winPercent = Math.trunc((gamesWon/total)*100);
+
+      var averageGuesses = 3;//((first*6) + (second*3) + (third*2) + (fourth*1.5) + (fifth*1.2) + (sixth*6)) / gamesWon;
+
+
+      var Ya = "statistics",
+        Ja = "fail",
+        Ua = {
+          currentStreak: currentStreak,
+          maxStreak: maxStreak,
+          guesses: n({
+            1: first,
+            2: second,
+            3: third,
+            4: fourth,
+            5: fifth,
+            6: sixth
+          }, Ja, 0),
+          winPercentage: winPercent,
+          gamesPlayed: total,
+          gamesWon: gamesWon,
+          averageGuesses: 3.9
+        };
+
+      window.localStorage.setItem(Ya, JSON.stringify(Ua));
+
+      wa = "gameState",
+      xa = {
+        boardState: ["rites","gator","ultra","","",""],
+        evaluations: [["present","absent","correct","absent","absent"],["absent","present","correct","absent","present"],["correct","correct","correct","correct","correct"],null,null,null],
+        rowIndex: 3,
+        solution: "ultra",
+        gameStatus: "WIN",
+        lastPlayedTs:    lastPlayed,
+        lastCompletedTs: lastPlayed,
+        restoringFromLocalStorage: null,
+        hardMode: !1
+      };
+      window.localStorage.setItem(wa, JSON.stringify(xa));
+    }
+  </script>
+</head>
+<body>
+  <h1>Set Wordle History</h1>
+
+  This page will set the history of your Wordle statistics so that you can carry
+  over from other site.   You'd just be cheating yourself if you were to change
+  these to non-real numbers; but do whatever you want.
+
+  <fieldset class="dates">
+    <legend>Dates</legend>
+
+    <label for="lastPlayed">Last date played:</label>
+    <input type="text" id="lastPlayed" value=""/>
+  </fieldset>
+
+  <fieldset class="streak">
+    <legend>Streak</legend>
+
+    <label for="total">Total Games Played</label>
+    <input type="text" id="total" value="0"/>
+    <label for="currentStreak">Current</label>
+    <input type="text" id="currentStreak" value="0"/>
+    <label for="maxStreak">Max</label>
+    <input type="text" id="maxStreak" value="0"/>
+  </fieldset>
+
+  <fieldset class="guessDistro">
+    <legend>Guess Distribution</legend>
+
+    <label for="first">First guess:</label>
+    <input type="text" id="first" value="0"/>
+
+    <label for="second"> Second guess:</label>
+    <input type="text" id="second" value="0"/>
+
+    <label for="third"> Third guess:</label>
+    <input type="text" id="third" value="0"/>
+
+    <label for="fourth"> Fourth guess:</label>
+    <input type="text" id="fourth" value="0"/>
+
+    <label for="fifth"> Fifth guess:</label>
+    <input type="text" id="fifth" value="0"/>
+
+    <label for="sixth">Sixth guess:</label>
+    <input type="text" id="sixth" value="0"/>
+
+  </fieldset>
+
+  <input type = "button" onclick = "sethistory()" value = "Set History">
+
+  <script>
+    $( function() {
+      var now = new Date();
+      $("#lastPlayed").datepicker();
+      $("#lastPlayed").datepicker("option", "dateFormat", "yy-mm-dd");
+      $("#lastPlayed").datepicker("setDate", now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate());
+
+      // get current values and plug in
+      var stats = window.localStorage.getItem("statistics");
+      var gameState = window.localStorage.getItem("gameState");
+      if (stats === undefined || gameState === undefined) {
+        return;
+      }
+
+      stats = JSON.parse(stats);
+      gameState = JSON.parse(gameState);
+
+      var lastPlayed = new Date(gameState.lastPlayedTs)
+      var offset = lastPlayed.getTimezoneOffset();
+      lastPlayed = new Date(lastPlayed.getTime() - (offset*60*1000));
+      var lastplayed = lastPlayed.toISOString().split('T')[0];
+      $("#lastPlayed").datepicker("setDate", lastplayed);
+
+      $("#total").val(stats.gamesPlayed);
+      $("#currentStreak").val(stats.currentStreak);
+      $("#maxStreak").val(stats.maxStreak);
+      $("#first").val(stats.guesses['1']);
+      $("#second").val(stats.guesses['2']);
+      $("#third").val(stats.guesses['3']);
+      $("#fourth").val(stats.guesses['4']);
+      $("#fifth").val(stats.guesses['5']);
+      $("#sixth").val(stats.guesses['6']);
+    } );
+  </script>
+</body>
+</html>
